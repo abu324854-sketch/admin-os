@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN CORE // Loyihalarni Boshqarish</title>
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --bg-panel: #111827;
+            --accent: #00f0ff;
+            --accent-secondary: #7000ff;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(0, 240, 255, 0.2);
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.15rem;
+            margin-bottom: 1.2rem;
+            color: var(--accent);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background: #090d16;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: white;
+            padding: 0.7rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-edit {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent);
+            padding: 0.45rem 0.8rem;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            padding: 0.45rem 0.8rem;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.2rem;
+        }
+
+        .project-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-row:last-child {
+            border-bottom: none;
+        }
+
+        .row-info strong {
+            color: var(--accent);
+            margin-right: 6px;
+        }
+
+        .row-info small {
+            display: block;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .row-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: #042f2e;
+            font-weight: 700;
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            display: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🛠️ ADMIN <span>CORE</span> // Firebase Sync</div>
+            <div id="statusText" style="color: var(--text-muted); font-size: 0.9rem;">Ulanmoqda...</div>
+        </header>
+
+        <div class="panel">
+            <h2 id="formTitle">Yangi loyiha qo‘shish</h2>
+            <form id="projectForm">
+                <div class="form-grid">
+                    <div>
+                        <label for="projId">Tartib raqami (#ID)</label>
+                        <input type="number" id="projId" required placeholder="Masalan: 40">
+                    </div>
+                    <div>
+                        <label for="projTitle">Loyiha nomi</label>
+                        <input type="text" id="projTitle" required placeholder="Masalan: AI Logistika Moduli">
+                    </div>
+                    <div>
+                        <label for="projCategory">Kategoriya</label>
+                        <select id="projCategory">
+                            <option value="Web">Web</option>
+                            <option value="AI">AI</option>
+                            <option value="Game">Game</option>
+                            <option value="Business">Business</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="projStatus">Holati</label>
+                        <select id="projStatus">
+                            <option value="active">Faol (Active)</option>
+                            <option value="draft">Jarayonda</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="projTech">Texnologiyalar (vergul bilan)</label>
+                        <input type="text" id="projTech" placeholder="HTML, JS, Firebase, Three.js">
+                    </div>
+                    <div>
+                        <label for="projLive">Live Demo havolasi</label>
+                        <input type="url" id="projLive" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label for="projCode">Kod / GitHub havolasi</label>
+                        <input type="url" id="projCode" placeholder="https://github.com/...">
+                    </div>
+                    <div class="full-width">
+                        <label for="projDesc">Qisqacha tavsif</label>
+                        <textarea id="projDesc" placeholder="Loyiha nima vazifani bajaradi?"></textarea>
+                    </div>
+                </div>
+                <div class="actions-row">
+                    <button type="submit" class="btn btn-save" id="submitBtn">Firebase’ga saqlash</button>
+                    <button type="button" class="btn btn-cancel" id="cancelEditBtn" style="display:none;">Bekor qilish</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Barcha loyihalar (<span id="countLabel">0</span>)</h2>
+            <div id="adminList"></div>
+        </div>
+    </div>
+
+    <div id="toast">Saqlandi!</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // index.html dagi AYNAN O'SHA firebaseConfig ni qo'ying
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const DB_PATH = 'projects_40_ecosystem';
+        let projects = [];
+        let editingOriginalId = null;
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const listRef = ref(db, DB_PATH);
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
+
+        onValue(listRef, (snapshot) => {
+            document.getElementById('statusText').textContent = "Firebase bilan sinxron";
+            if (snapshot.exists()) {
+                const raw = snapshot.val();
+                projects = Array.isArray(raw) ? raw.filter(Boolean) : Object.values(raw);
+                projects.sort((a, b) => Number(b.id) - Number(a.id));
+            } else {
+                projects = [];
+            }
+            renderAdminList();
+        }, (err) => {
+            document.getElementById('statusText').textContent = "Ulanish xatosi";
+            console.error(err);
+        });
+
+        function renderAdminList() {
+            const container = document.getElementById('adminList');
+            document.getElementById('countLabel').textContent = projects.length;
+
+            if (!projects.length) {
+                container.innerHTML = `<p style="color: var(--text-muted);">Hozircha loyihalar yo‘q. Yuqoridan qo‘shing.</p>`;
+                return;
+            }
+
+            container.innerHTML = projects.map(p => `
+                <div class="project-row">
+                    <div class="row-info">
+                        <div><strong>#${p.id}</strong> ${p.title} <span style="color:var(--text-muted); font-size:0.8rem;">[${p.category}]</span></div>
+                        <small>${p.description || ''}</small>
+                    </div>
+                    <div class="row-btns">
+                        <button class="btn btn-edit" onclick="startEdit('${p.id}')">Tahrirlash</button>
+                        <button class="btn btn-delete" onclick="deleteProject('${p.id}')">O‘chirish</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.startEdit = function(id) {
+            const item = projects.find(p => String(p.id) === String(id));
+            if (!item) return;
+
+            editingOriginalId = String(item.id);
+            document.getElementById('formTitle').textContent = `Loyihani tahrirlash (#${item.id})`;
+            document.getElementById('submitBtn').textContent = "O‘zgarishni saqlash";
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+
+            document.getElementById('projId').value = item.id;
+            document.getElementById('projTitle').value = item.title || '';
+            document.getElementById('projCategory').value = item.category || 'Web';
+            document.getElementById('projStatus').value = item.status || 'active';
+            document.getElementById('projTech').value = (item.tech || []).join(', ');
+            document.getElementById('projLive').value = item.liveUrl || '';
+            document.getElementById('projCode').value = item.codeUrl || '';
+            document.getElementById('projDesc').value = item.description || '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function resetForm() {
+            editingOriginalId = null;
+            document.getElementById('projectForm').reset();
+            document.getElementById('formTitle').textContent = "Yangi loyiha qo‘shish";
+            document.getElementById('submitBtn').textContent = "Firebase’ga saqlash";
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+        window.deleteProject = async function(id) {
+            if (!confirm(`#${id} raqamli loyihani o‘chirishni tasdiqlaysizmi?`)) return;
+            await remove(ref(db, `${DB_PATH}/project_${id}`));
+            showToast("Loyiha o‘chirildi!");
+        };
+
+        document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const idVal = Number(document.getElementById('projId').value);
+            const projectObj = {
+                id: idVal,
+                title: document.getElementById('projTitle').value.trim(),
+                category: document.getElementById('projCategory').value,
+                status: document.getElementById('projStatus').value,
+                tech: document.getElementById('projTech').value
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean),
+                liveUrl: document.getElementById('projLive').value.trim() || '#',
+                codeUrl: document.getElementById('projCode').value.trim() || '#',
+                description: document.getElementById('projDesc').value.trim()
+            };
+
+            if (editingOriginalId && String(editingOriginalId) !== String(idVal)) {
+                await remove(ref(db, `${DB_PATH}/project_${editingOriginalId}`));
+            }
+
+            await set(ref(db, `${DB_PATH}/project_${idVal}`), projectObj);
+            showToast("Firebase’ga sinxronlandi!");
+            resetForm();
+        });
+    </script>
+</body>
+</html>
