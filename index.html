@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADMIN CORE // Loyihalarni Boshqarish</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
             --bg-dark: #090d16;
@@ -54,6 +58,27 @@
 
         .logo span {
             color: var(--accent);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .install-btn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--accent), #00b8d4);
+            color: #000;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
         }
 
         .panel {
@@ -193,7 +218,10 @@
     <div class="container">
         <header>
             <div class="logo">🛠️ ADMIN <span>CORE</span> // Firebase Sync</div>
-            <div id="statusText" style="color: var(--text-muted); font-size: 0.9rem;">Ulanmoqda...</div>
+            <div class="header-actions">
+                <button id="installAppBtn" class="install-btn">📲 Admin ilovani o‘rnatish</button>
+                <div id="statusText" style="color: var(--text-muted); font-size: 0.9rem;">Ulanmoqda...</div>
+            </div>
         </header>
 
         <div class="panel">
@@ -386,6 +414,38 @@
             showToast("Firebase’ga sinxronlandi!");
             resetForm();
         });
+
+        // PWA Install
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-flex';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .catch(err => console.warn('SW xatosi:', err));
+            });
+        }
     </script>
 </body>
 </html>
